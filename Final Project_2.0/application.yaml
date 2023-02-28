@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    username: root
+    password: AndreLoveProgramm95
+    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL57Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+indexing-settings:
+  sites:
+    - url: http://radiomv.ru/
+      name: Radiomv.ru
+#    - url: https://volochek.life/
+#      name: Volochek.life
+    - url: https://www.playback.ru/
+      name: PlayBack.Ru
+
+connection-settings:
+  userAgent: Mozilla/5.0 (Windows; U;  WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6
+  referrer: http://www.google.com
