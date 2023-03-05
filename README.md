@@ -41,8 +41,8 @@ indexing-settings:
 
 Ниже можно увидеть веб-интерфейс.
 
-![Image](ScreenForReadMe.jpg)
+![Image](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/screenforreadme.png)
 
-![Image2](ScreenForReadMe2.jpg)
+![Image2](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe2.jpg)
 
-![Image3](ScreenForReadMe2.jpg)
+![Image3](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe3.jpg)
