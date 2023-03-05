@@ -14,11 +14,11 @@
 6. Результаты поиска ранжируются, сортируются и отдаются пользователю.
 
 ## Стэк используемых технологий
-Проект реализован на основе Spring Boot и сборщика Maven с подключением шаблонизатора Thymeleaf, библиотек Lombok, JSOUP и лемматизатора(для русского и английского языков). Используется база данных MYSQL.
+Проект реализован на основе Spring Boot и сборщика Maven с подключением шаблонизатора Thymeleaf, библиотек Lombok, JSOUP и лемматизатора(для русского и английского языков). Используется база данных MySQL.
 
 ## Как запустить проект
 1. Скопируйте данный проект из Git-репозитория в среду разработки.
-2. Создайте свою базу данных MYSQL и подключите ее к проекту, изменив данные в файле application.yaml:
+2. Создайте свою базу данных MySQL и подключите ее к проекту, изменив данные в файле *application.yaml*:
 ```
 spring:
   datasource:
@@ -26,7 +26,23 @@ spring:
     password: password
     url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
 ```
-3. В этом же файле можно задать любые сайты для индексации в пункте: indexing-settings.sites
+3. В этом же файле можно задать любые сайты для индексации в пункте:
+```
+indexing-settings:
+  sites:
+    - url: http://radiomv.ru/
+      name: Radiomv.ru
+    - url: https://volochek.life/
+      name: Volochek.life
+    - url: https://www.playback.ru/
+      name: PlayBack.Ru
+```
 4. Далее можно запускать проект и открыть его в любом браузере по адресу: http://localhost:8080/
 
-![Image](/src/main/ScreenForReadMe.jpg)
+Ниже можно увидеть веб-интерфейс.
+
+![Image](ScreenForReadMe.jpg)
+
+![Image2](ScreenForReadMe2.jpg)
+
+![Image3](ScreenForReadMe2.jpg)
