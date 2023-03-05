@@ -28,4 +28,5 @@ spring:
 ```
 3. В этом же файле можно задать любые сайты для индексации в пункте: indexing-settings.sites
 4. Далее можно запускать проект и открыть его в любом браузере по адресу: http://localhost:8080/
-![This is an image](https://myoctocat.com/assets/images/base-octocat.svg)
+
+![Image](/src/main/ScreenForReadMe.jpg)
