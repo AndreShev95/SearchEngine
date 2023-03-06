@@ -18,7 +18,7 @@
 
 ## Как запустить проект
 1. Скопируйте данный проект из Git-репозитория в среду разработки.
-2. Создайте свою базу данных MySQL и подключите ее к проекту, изменив данные в файле *application.yaml*:
+2. Создайте свою базу данных MySQL и подключите ее к проекту, изменив данные в файле ***application.yaml***:
 ```
 spring:
   datasource:
@@ -39,10 +39,14 @@ indexing-settings:
 ```
 4. Далее можно запускать проект и открыть его в любом браузере по адресу: http://localhost:8080/
 
-Ниже можно увидеть веб-интерфейс.
+### Веб-интерфейс проекта
+Интерфейс представляет из себя одну страницу с 3 вкладками.
 
+***Стартовая вкладка, на которой отображается статистика по всем индексированным сайтам:***
 ![Image](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/screenforreadme.png)
 
+***Вкладка для запуска/остановки полной индексации и запуск индексации заданной одной страницы:***
 ![Image2](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe2.jpg)
 
+***И вкладка для поиска фраз по индексированным сайтам (всем сразу или какому-то одному):***
 ![Image3](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe3.jpg)
