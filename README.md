@@ -43,7 +43,7 @@ indexing-settings:
 Интерфейс представляет из себя одну страницу с 3 вкладками.
 
 ***Стартовая вкладка, на которой отображается статистика по всем индексированным сайтам:***
-![Image](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/screenforreadme.png)
+![Image](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe.jpg)
 
 ***Вкладка для запуска/остановки полной индексации и запуск индексации заданной одной страницы:***
 ![Image2](https://github.com/AndreShev95/SearchEngine/blob/main/Final%20Project_2.0/src/main/ScreenForReadMe2.jpg)
