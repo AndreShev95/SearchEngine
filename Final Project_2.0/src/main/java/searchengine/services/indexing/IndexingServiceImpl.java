@@ -66,7 +66,8 @@ public class IndexingServiceImpl implements IndexingService {
     }
 
     @Override
-    public void indexPage(String url, String rootUrl, String rootName) {
+    public void indexPage(String url, String rootUrl, String rootName, AtomicBoolean indexingInProcess) {
+        this.indexingInProcess = indexingInProcess;
         setIndexingStatusSite(rootUrl, rootName);
         int count = pageRepository.findPagesByUrl(url.substring(rootUrl.length() - 1)).size();
         if (count != 0) {
@@ -90,14 +91,15 @@ public class IndexingServiceImpl implements IndexingService {
         }
         pageRepository.save(page);
         if (page.getCode() == 200) {
-            makeAnalyzeText(page);
+            makeAnalyzeText(page, indexingInProcess);
             setIndexedStatusSite(idSite);
         }
+        indexingInProcess.set(false);
     }
 
-    private void makeAnalyzeText(Page page) {
+    private void makeAnalyzeText(Page page, AtomicBoolean indexingInProcess) {
         TextAnalyzer textAnalyzer = new TextAnalyzer();
-        textAnalyzer.analyze(page, lemmaRepository, searchIndexRepository);
+        textAnalyzer.analyze(page, lemmaRepository, searchIndexRepository, indexingInProcess);
     }
 
     private Boolean checkToExistenceSite(String path) {

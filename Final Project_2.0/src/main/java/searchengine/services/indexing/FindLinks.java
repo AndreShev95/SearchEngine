@@ -109,7 +109,7 @@ public class FindLinks extends RecursiveAction {
     private void makeAnalyzeText(Page page) {
         if (page.getCode() == 200) {
             TextAnalyzer textAnalyzer = new TextAnalyzer();
-            textAnalyzer.analyze(page, lemmaRepository, searchIndexRepository);
+            textAnalyzer.analyze(page, lemmaRepository, searchIndexRepository, indexingInProcess);
         }
     }
 

@@ -87,11 +87,12 @@ public class ApiController {
             }
         }
         if (correctUrl) {
+            indexingInProcess.set(true);
             IndexingResponse responseIndexPageSuccess = new IndexingResponse();
             responseIndexPageSuccess.setResult(true);
             String finalRootUrl = rootUrl;
             String finalRootName = rootName;
-            new Thread(() -> indexingService.indexPage(url, finalRootUrl, finalRootName)).start();
+            new Thread(() -> indexingService.indexPage(url, finalRootUrl, finalRootName, indexingInProcess)).start();
             return ResponseEntity.ok(responseIndexPageSuccess);
         } else {
             IndexingResponse responseIndexPageFail = new IndexingResponse();

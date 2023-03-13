@@ -13,16 +13,20 @@ import searchengine.model.repositories.LemmaRepository;
 import searchengine.model.repositories.SearchIndexRepository;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TextAnalyzer {
     private final HashMap<String, HashSet<String>> formsLemmas = new HashMap<>();
 
     public void analyze(Page page, LemmaRepository lemmaRepository,
-                        SearchIndexRepository searchIndexRepository) {
+                        SearchIndexRepository searchIndexRepository, AtomicBoolean indexingInProcess) {
         String text = getText(page);
         if (!text.equals("")) {
             String[] words = getArrayWords(text);
-            List<String> listWords = selectWords(words);
+            List<String> listWords = selectWords(words, indexingInProcess);
+            if (!indexingInProcess.get()) {
+                return;
+            }
             HashMap<String, Integer> repeatsWords = calculateRepeats(listWords);
             List<String> lemmasList = lemmaRepository.findAllLemmas();
             Integer pageId = page.getId();
@@ -74,9 +78,12 @@ public class TextAnalyzer {
                 replaceAll("Ё", "Е").trim().split("\\s+");
     }
 
-    private List<String> selectWords(String[] words) {
+    private List<String> selectWords(String[] words, AtomicBoolean indexingInProcess) {
         ArrayList<String> listWords = new ArrayList<>();
         for (String w : words) {
+            if (!indexingInProcess.get()) {
+                break;
+            }
             String s = w.toLowerCase();
             try {
                 LuceneMorphology luceneMorph;

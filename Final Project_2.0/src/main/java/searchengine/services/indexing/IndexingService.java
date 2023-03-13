@@ -7,5 +7,5 @@ public interface IndexingService {
 
     void stopIndexing(AtomicBoolean indexingInProcess);
 
-    void indexPage(String url, String rootUrl, String rootName);
+    void indexPage(String url, String rootUrl, String rootName, AtomicBoolean indexingInProcess);
 }
