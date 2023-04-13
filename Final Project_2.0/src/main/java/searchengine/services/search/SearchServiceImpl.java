@@ -97,6 +97,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private HashMap<String, Integer> selectWords(String[] words) {
+        Double limitSearch = 0.95 * pageRepository.count();
         HashMap<String, Integer> mapLemmas = new HashMap<>();
         for (String s : words) {
             try {
@@ -121,7 +122,7 @@ public class SearchServiceImpl implements SearchService {
                         continue;
                     }
                     Integer frequency = lemmaList.get(0).getFrequency();
-                    if (frequency < 0.95 * pageRepository.count()) {
+                    if (frequency < limitSearch) {
                         mapLemmas.put(word, frequency);
                     }
                 }

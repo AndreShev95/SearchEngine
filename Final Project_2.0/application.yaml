@@ -16,12 +16,12 @@ spring:
 
 indexing-settings:
   sites:
-    - url: http://radiomv.ru/
-      name: Radiomv.ru
+#    - url: http://radiomv.ru/
+#      name: Radiomv.ru
 #    - url: https://volochek.life/
 #      name: Volochek.life
-#    - url: https://www.playback.ru/
-#      name: PlayBack.Ru
+    - url: https://www.playback.ru/
+      name: PlayBack.Ru
     - url: https://et-cetera.ru/mobile/
       name: Et-cetera
 

@@ -21,6 +21,7 @@ public class TextAnalyzer {
     public void analyze(Page page, LemmaRepository lemmaRepository,
                         SearchIndexRepository searchIndexRepository, AtomicBoolean indexingInProcess) {
         String text = getText(page);
+        Integer pageId = page.getId();
         if (!text.equals("")) {
             String[] words = getArrayWords(text);
             List<String> listWords = selectWords(words, indexingInProcess);
@@ -28,13 +29,22 @@ public class TextAnalyzer {
                 return;
             }
             HashMap<String, Integer> repeatsWords = calculateRepeats(listWords);
-            List<String> lemmasList = lemmaRepository.findAllLemmas();
-            Integer pageId = page.getId();
+            List<Lemma> lemmasList = lemmaRepository.findLemmasBySiteId(page.getSiteId());
+            Map<String, Lemma> lemmaListMap = new HashMap<>();
+            for (Lemma l : lemmasList) {
+                lemmaListMap.put(l.getLemma(), l);
+            }
+            Map<String, Lemma> lemmaMap = new HashMap<>();
             repeatsWords.forEach((key, value) -> {
                 HashSet<String> listLemmas = formsLemmas.get(key);
                 Lemma lemma = new Lemma();
-                if (lemmasList.contains(key)) {
-                    lemma = lemmaRepository.findLemmasByLemma(key).get(0);
+                if (lemmaMap.containsKey(key)) {
+                    lemma = lemmaMap.get(key);
+                    String[] arrayLemmas = lemma.getFormsLemmas().split(",");
+                    Collections.addAll(listLemmas, arrayLemmas);
+                }
+                else if (lemmaListMap.containsKey(key)) {
+                    lemma = lemmaListMap.get(key);
                     lemma.setFrequency(lemma.getFrequency() + 1);
                     String[] arrayLemmas = lemma.getFormsLemmas().split(",");
                     Collections.addAll(listLemmas, arrayLemmas);
@@ -44,14 +54,18 @@ public class TextAnalyzer {
                     lemma.setFrequency(1);
                 }
                 lemma.setFormsLemmas(String.join(",", listLemmas));
-                lemmaRepository.save(lemma);
-                Integer idLemma = getLemmaId(key, lemmaRepository);
-                SearchIndex searchIndex = new SearchIndex();
-                searchIndex.setPageId(pageId);
-                searchIndex.setLemmaId(idLemma);
-                searchIndex.setRank(value.floatValue());
-                searchIndexRepository.save(searchIndex);
+                lemmaMap.put(key, lemma);
             });
+            lemmaRepository.saveAll(new ArrayList<>(lemmaMap.values()));
+            List<SearchIndex> indexesList = new ArrayList<>();
+            repeatsWords.forEach((key, value) -> {
+                        SearchIndex searchIndex = new SearchIndex();
+                        searchIndex.setPageId(pageId);
+                        searchIndex.setLemmaId(getLemmaId(key, lemmaRepository));
+                        searchIndex.setRank(value.floatValue());
+                        indexesList.add(searchIndex);
+            });
+            searchIndexRepository.saveAll(indexesList);
         }
     }
 
