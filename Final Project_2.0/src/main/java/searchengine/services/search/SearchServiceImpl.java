@@ -49,17 +49,14 @@ public class SearchServiceImpl implements SearchService {
             return getFailEmptyResponse(searchResponse);
         }
         String[] arrayString = getArrayWords(query);
-        HashMap<String, Integer> mapWords = selectWords(arrayString);
-        Map<List<Integer>, List<Integer>> listMap;
+        HashMap<String, Integer> mapWords = selectWords(arrayString, searchSiteId);
+        Map<Integer, List<SearchIndex>> indexList;
         if (!mapWords.isEmpty()) {
-            listMap = findLemmaAndPageIds(mapWords, searchSiteId);
+            indexList = findLemmaAndPageIds(mapWords, searchSiteId);
         } else {
             return getFailResponse(searchResponse);
         }
-        List<SearchData> listResult = new ArrayList<>();
-        for (Map.Entry<List<Integer>, List<Integer>> entry : listMap.entrySet()) {
-            listResult = getResultList(entry.getKey(), entry.getValue());
-        }
+        List<SearchData> listResult = getResultList(indexList);
         List<SearchData> listAfterFilter = new ArrayList<>();
         int i = 1;
         for (SearchData searchData : listResult) {
@@ -70,7 +67,7 @@ public class SearchServiceImpl implements SearchService {
             i++;
         }
         if (listAfterFilter.isEmpty()) {
-            return getFailResponse(searchResponse);
+            return getFailFilterResponse(searchResponse);
         } else {
             searchResponse.setData(listAfterFilter);
             searchResponse.setResult(true);
@@ -79,15 +76,22 @@ public class SearchServiceImpl implements SearchService {
         }
     }
 
+    private SearchResponse getFailResponse(SearchResponse failResponse) {
+        failResponse.setResult(true);
+        failResponse.setData(new ArrayList<>());
+        failResponse.setCount(0);
+        return failResponse;
+    }
+
     private SearchResponse getFailEmptyResponse(SearchResponse failResponse) {
         failResponse.setResult(false);
         failResponse.setError("Задан пустой поисковый запрос");
         return failResponse;
     }
 
-    private SearchResponse getFailResponse(SearchResponse failResponse) {
+    private SearchResponse getFailFilterResponse(SearchResponse failResponse) {
         failResponse.setResult(false);
-        failResponse.setError("Данной фразы нет на сайте или задан слишком популярный запрос. Повторите запрос.");
+        failResponse.setError("Задан слишком популярный запрос. Повторите запрос.");
         return failResponse;
     }
 
@@ -96,7 +100,7 @@ public class SearchServiceImpl implements SearchService {
                 replaceAll("ё", "е").trim().split("\\s+");
     }
 
-    private HashMap<String, Integer> selectWords(String[] words) {
+    private HashMap<String, Integer> selectWords(String[] words, Integer siteId) {
         Double limitSearch = 0.95 * pageRepository.count();
         HashMap<String, Integer> mapLemmas = new HashMap<>();
         for (String s : words) {
@@ -117,13 +121,20 @@ public class SearchServiceImpl implements SearchService {
                     continue;
                 }
                 if (!mapLemmas.containsKey(word)) {
-                    List<Lemma> lemmaList = lemmaRepository.findLemmasByLemma(word);
+                    List<Lemma> lemmaList;
+                    if (siteId > 0) {
+                        lemmaList = lemmaRepository.findLemmasByLemmaAndSiteId(word, siteId);
+                    } else {
+                        lemmaList = lemmaRepository.findLemmasByLemma(word);
+                    }
                     if (lemmaList.size() == 0) {
                         continue;
                     }
-                    Integer frequency = lemmaList.get(0).getFrequency();
-                    if (frequency < limitSearch) {
-                        mapLemmas.put(word, frequency);
+                    for (Lemma lemma : lemmaList) {
+                        Integer frequency = lemma.getFrequency();
+                        if (frequency < limitSearch) {
+                            mapLemmas.put(word, frequency);
+                        }
                     }
                 }
             } catch (Exception ex) {
@@ -135,11 +146,10 @@ public class SearchServiceImpl implements SearchService {
                         (Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
-    private Map<List<Integer>, List<Integer>> findLemmaAndPageIds(HashMap<String, Integer> mapWords,
-                                                                  Integer searchSiteId) {
-        List<Integer> listPageId = new ArrayList<>();
-        List<Integer> listLemmaId = new ArrayList<>();
-        Map<List<Integer>, List<Integer>> listMap = new HashMap<>();
+    private Map<Integer, List<SearchIndex>> findLemmaAndPageIds(HashMap<String, Integer> mapWords,
+                                                                Integer searchSiteId) {
+        Map<Integer, List<SearchIndex>> listMap = new HashMap<>();
+        List<SearchIndex> indexList = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : mapWords.entrySet()) {
             Integer idLemma;
             List<Lemma> listLemma;
@@ -150,35 +160,33 @@ public class SearchServiceImpl implements SearchService {
                 listLemma = lemmaRepository.findLemmasByLemma(entry.getKey());
             }
             if (!listLemma.isEmpty()) {
-                idLemma = listLemma.get(0).getId();
-                List<SearchIndex> indexList = searchIndexRepository.findIndexesByLemmaId(idLemma);
-                List<Integer> list = new ArrayList<>();
-                for (SearchIndex index : indexList) {
-                    if (listPageId.isEmpty() || listPageId.contains(index.getPageId())) {
-                        list.add(index.getPageId());
-                    }
+                for (Lemma lemma : listLemma) {
+                    idLemma = lemma.getId();
+                    indexList.addAll(searchIndexRepository.findIndexesByLemmaId(idLemma));
                 }
-                if (list.isEmpty()) {
-                    continue;
-                }
-                listPageId.clear();
-                listPageId = list;
-                listLemmaId.add(idLemma);
             }
         }
-        listMap.put(listPageId, listLemmaId);
+        for (SearchIndex index : indexList) {
+            List<SearchIndex> searchIndexList = new ArrayList<>();
+            Integer pageId = index.getPageId();
+            if (listMap.containsKey(pageId)) {
+                searchIndexList = listMap.get(pageId);
+            }
+            searchIndexList.add(index);
+            listMap.put(pageId, searchIndexList);
+        }
         return listMap;
-
     }
 
-    private List<SearchData> getResultList(List<Integer> listPageId, List<Integer> listLemmaId) {
+    private List<SearchData> getResultList(Map<Integer, List<SearchIndex>> indexList) {
         List<SearchData> listResult = new ArrayList<>();
-        for (Integer pageId : listPageId) {
+        for (Map.Entry<Integer, List<SearchIndex>> entry : indexList.entrySet()) {
+            Integer pageId = entry.getKey();
             SearchData searchData = new SearchData();
             Page page = pageRepository.findById(pageId).orElse(new Page());
             Site site = siteRepository.findById(page.getSiteId()).orElse(new Site());
             searchData.setUri(page.getPath());
-            searchData.setSite(site.getUrl());
+            searchData.setSite(site.getUrl().substring(0, site.getUrl().length() - 1));
             searchData.setSiteName(site.getName());
             String content = page.getContent();
             Document document = Jsoup.parse(content);
@@ -186,9 +194,10 @@ public class SearchServiceImpl implements SearchService {
             searchData.setTitle(title);
             String text = getText(title, content, document);
             StringBuilder snippetBuilder = new StringBuilder();
-            Float relevanceAbs = 0.0f;
-            for (Integer lemmaId : listLemmaId) {
-                relevanceAbs += searchIndexRepository.getRankIndexByPageAndLemmaIds(pageId, lemmaId);
+            float relevanceAbs = 0.0f;
+            for (SearchIndex index : entry.getValue()) {
+                Integer lemmaId = index.getLemmaId();
+                relevanceAbs += index.getRank();
                 String listForms = lemmaRepository.findFormsLemmasById(lemmaId).get(0);
                 String snippet = findSnippet(text, listForms);
                 snippetBuilder.append(snippet);
@@ -227,12 +236,14 @@ public class SearchServiceImpl implements SearchService {
         int around = 5;
         StringBuilder stringBuilder = new StringBuilder();
         for (String word3 : listWords) {
-            String pattern = "([^ ]+ ?){0," + around + "}" + word3 + "[^a-zA-Zа-яА-ЯёЁ]"
-                    + "( ?[^ ]+){0," + around + "}";
-            Matcher m = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(text);
-            while (m.find()) {
-                stringBuilder.append(m.group()
-                        .replaceAll(word3, "<b>" + word3 + "</b>")).append("\n");
+            if (text.contains(word3)) {
+                String pattern = "([^ ]+ ?){0," + around + "}" + word3 + "[^a-zA-Zа-яА-ЯёЁ]"
+                        + "( ?[^ ]+){0," + around + "}";
+                Matcher m = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(text);
+                while (m.find()) {
+                    stringBuilder.append(m.group()
+                            .replaceAll(word3, "<b>" + word3 + "</b>")).append("\n");
+                }
             }
         }
         return stringBuilder.toString();

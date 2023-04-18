@@ -20,10 +20,12 @@ indexing-settings:
 #      name: Radiomv.ru
 #    - url: https://volochek.life/
 #      name: Volochek.life
-    - url: https://www.playback.ru/
-      name: PlayBack.Ru
+#    - url: https://www.playback.ru/
+#      name: PlayBack.Ru
     - url: https://et-cetera.ru/mobile/
       name: Et-cetera
+    - url: https://www.svetlovka.ru/
+      name: Svetlovka.ru
 
 connection-settings:
   userAgent: Mozilla/5.0 (Windows; U;  WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6

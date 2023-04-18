@@ -11,7 +11,4 @@ public interface SearchIndexRepository extends JpaRepository<SearchIndex, Intege
     @Query("SELECT i FROM SearchIndex i WHERE i.lemmaId = ?1")
     List<SearchIndex> findIndexesByLemmaId(Integer lemmaId);
 
-    @Query("SELECT i.rank FROM SearchIndex i WHERE i.pageId = ?1 AND i.lemmaId = ?2")
-    Float getRankIndexByPageAndLemmaIds(Integer pageId, Integer lemmaId);
-
 }

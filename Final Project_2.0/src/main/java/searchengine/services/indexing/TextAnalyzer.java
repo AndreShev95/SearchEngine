@@ -61,7 +61,7 @@ public class TextAnalyzer {
             repeatsWords.forEach((key, value) -> {
                         SearchIndex searchIndex = new SearchIndex();
                         searchIndex.setPageId(pageId);
-                        searchIndex.setLemmaId(getLemmaId(key, lemmaRepository));
+                        searchIndex.setLemmaId(getLemmaId(key, lemmaRepository, page.getSiteId()));
                         searchIndex.setRank(value.floatValue());
                         indexesList.add(searchIndex);
             });
@@ -142,7 +142,7 @@ public class TextAnalyzer {
         return repeats;
     }
 
-    private Integer getLemmaId(String lemma, LemmaRepository lemmaRepository) {
-        return lemmaRepository.findLemmasByLemma(lemma).get(0).getId();
+    private Integer getLemmaId(String lemma, LemmaRepository lemmaRepository, Integer siteId) {
+        return lemmaRepository.findLemmasByLemmaAndSiteId(lemma, siteId).get(0).getId();
     }
 }
